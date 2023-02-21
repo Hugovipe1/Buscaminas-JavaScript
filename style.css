@@ -1,0 +1,106 @@
+#tableroJuego{
+    text-align: center;
+    margin: 0 auto;
+    border: rgb(16, 96, 16) 1px solid;
+}
+
+#cabecera{
+    color: white;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background-color: rgb(16, 96, 16);
+    border: 1px solid rgb(16, 96, 16);
+    padding-top: 2px;
+    padding-bottom: 2px;
+    border-radius: 3px 3px 0 0;
+}
+
+#cabecera>div{
+    display: flex;
+    align-items: center;
+}
+
+.inicioPar{
+    min-height: 20px;
+    background-color: rgb(128, 192, 32);
+}
+.inicioImpar{
+    min-height: 20px;
+    background-color: rgb(161, 226, 64);
+}
+
+.widthfacil{
+    width: calc(5 * 30px);
+}
+
+.widthmedio{
+    width: calc(18 * 20px);
+}
+
+.widthdificil{
+    width: calc(24* 20px);
+}
+
+.facil{
+    display: grid;
+    grid-template-columns: repeat(5,30px);
+}
+.medio{
+    display: grid;
+    grid-template-columns: repeat(18, 20px);
+}
+.dificil{
+    display: grid;
+    grid-template-columns: repeat(24, 20px);
+}
+.despejadoPar{
+    background-color: bisque;
+    border: rgba(201, 143, 73, 0.551) 1px solid;
+    font-weight: bolder;
+}
+.despejadoImpar{
+    background-color: rgb(201, 143, 73);
+    border: rgba(255, 228, 196, 0.634) 1px solid;
+    font-weight: bolder;
+}
+
+#resultado{
+    text-align: center;
+}
+
+
+
+.uno{
+    color: blue;
+}
+
+.dos{
+    color: green;
+}
+
+.tres{
+    color: red;
+}
+
+.cuatro{
+    color: rgb(5, 5, 112);
+}
+
+.cinco{
+    color: violet;
+}
+
+.seis{
+    color: rgb(151, 151, 24);
+}
+
+.siete{
+    color: black;
+}
+
+.ocho{
+    color: blueviolet;
+}
+
