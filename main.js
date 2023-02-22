@@ -8,30 +8,35 @@ document.addEventListener("DOMContentLoaded", function () {
     let minasRestantes = document.getElementById("minasRestantes");
     let tiempo = document.getElementById("tiempo");
     let cabecera = document.getElementById("cabecera");
+    let resultadoHtml = document.getElementById("resultado");
+    let contadorClick = 0;
     let contador = 0;
+    let interval;
 
     tableroJuego.addEventListener("click", clickTablero);
     tableroJuego.addEventListener("contextmenu", clickBandera);
 
-    let contadorInterval = setInterval(function () {
-        tiempo.innerHTML = contador++;
-    }, 1000, contador);
+
     pintarTablero();
 
     document.getElementById("select").addEventListener("change", function (e) { //Cuando cambia el select(dificultad)
+        clearInterval(interval);
+        tiempo.innerHTML = "";
+        contadorClick = 0;
         contador = 0;
-        contadorInterval;
         tableroJuego.addEventListener("click", clickTablero);
         tableroJuego.addEventListener("contextmenu", clickBandera);
+        resultadoHtml.innerHTML = "";
         pintarTablero(e.target.value);
     });
 
-
-
-    let resultadoHtml = document.getElementById("resultado");
     function pintarTablero(dificultad = "facil") {
         tableroJuego.innerHTML = "";
-        buscaminas.init(dificultad);
+        try {
+            buscaminas.init(dificultad);
+        } catch (error) {
+            console.error(error.message);
+        }
         let celda;
         let numeroCelda;
         minasRestantes.innerHTML = buscaminas.banderas;
@@ -56,39 +61,42 @@ document.addEventListener("DOMContentLoaded", function () {
                     else {
                         celda.classList.add("inicioImpar");
                     }
-
                 }
                 numeroCelda = document.createTextNode("");
                 celda.appendChild(numeroCelda);
                 celda.dataset.posicion = fila + "-" + columna;
                 tableroJuego.appendChild(celda);
             }
-
         }
     }
 
     function clickTablero(e) {
-        let posicion = e.target.getAttribute("data-posicion").split("-");
-        let fila = parseInt(posicion[0]);
-        let columna = parseInt(posicion[1]);
-        let resultado;
-        if (e.buttons == 0) {
-            resultado = buscaminas.picar(fila, columna);
-            actualizarTableroDom();
-            if (resultado == 0 || resultado == 1) {
-                ganarOperder(resultado);
-            }
-            buscaminas.mostrarTableroJuego();
-        }
-        else if (e.buttons == 3) {
-            resultado = buscaminas.despejar(fila, columna);
-            if (resultado[1]) { // Si se ha modificado el tablero
+        if (e.target.id != "tableroJuego") {
+            let posicion = e.target.dataset.posicion.split("-");
+            let fila = parseInt(posicion[0]);
+            let columna = parseInt(posicion[1]);
+            let resultado;
+            if (e.buttons == 0) {
+                resultado = buscaminas.picar(fila, columna);
                 actualizarTableroDom();
-                if (resultado[0] == 0 || resultado[0] == 1) {
-                    ganarOperder(resultado[0]);
+                ganarOperder(resultado); //Comprueba si se ha ganado o perdido
+            }
+            else if (e.buttons == 3) {
+                resultado = buscaminas.despejar(fila, columna);
+                if (resultado[1]) { // Si se ha modificado el tablero
+                    actualizarTableroDom();
+                    if (resultado[0] == 0 || resultado[0] == 1) {
+                        ganarOperder(resultado[0]);
+                    }
                 }
             }
-            
+            if (contadorClick == 0) {
+                interval = setInterval(function () {
+                    contador++;
+                    tiempo.innerHTML = contador;
+                }, 1000);
+                contadorClick++;
+            }
         }
     }
 
@@ -96,9 +104,9 @@ document.addEventListener("DOMContentLoaded", function () {
         let celda;
         for (let fila = 0; fila < buscaminas.filas; fila++) {
             for (let columna = 0; columna < buscaminas.columnas; columna++) {
-                if (buscaminas.tableroJuego[fila][columna]!= 0) {
+                if (buscaminas.tableroJuego[fila][columna] != 0) {
                     celda = document.querySelector(`[data-posicion="${fila}-${columna}"]`);
-                    if (buscaminas.tableroJuego[fila][columna] != "B" && buscaminas.tableroJuego[fila][columna] != "9") {
+                    if (buscaminas.tableroJuego[fila][columna] != "B" && buscaminas.tableroJuego[fila][columna] != "9" && buscaminas.tableroJuego[fila][columna] != "X") {
                         celda.classList.remove("inicioPar");
                         celda.classList.remove("inicioImpar");
                         if (fila % 2 == 0) {
@@ -116,7 +124,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             else {
                                 celda.classList.add("despejadoImpar");
                             }
-    
+
                         }
                         if (buscaminas.tableroJuego[fila][columna] == "*") {
                             celda.classList.add("cero");
@@ -127,15 +135,12 @@ document.addEventListener("DOMContentLoaded", function () {
                             celda.innerHTML = buscaminas.tableroJuego[fila][columna];
                         }
                     }
-                    
-                    
-                    
                 }
             }
         }
     }
 
-    function mostrarMinas(){
+    function mostrarMinas() {
         let celda;
         for (let fila = 0; fila < buscaminas.filas; fila++) {
             for (let columna = 0; columna < buscaminas.columnas; columna++) {
@@ -172,47 +177,42 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    
-
-
     function clickBandera(e) {
         e.preventDefault();
-        let resultado;
-        let posicion = e.target.getAttribute("data-posicion").split("-");
-        let celda = document.querySelector(`[data-posicion="${posicion[0]}-${posicion[1]}"]`);
-        let fila = parseInt(posicion[0]);
-        let columna = parseInt(posicion[1]);
-        resultado = buscaminas.marcar(fila, columna);
-        if (resultado == 1) { // Si se ha puesto una bandera
-            celda.innerHTML = "🚩";
-        }
-        else if (resultado == 0){ // Si se ha quitado una bandera
-            celda.innerHTML = "";
+        console.log(e.target.tagName);
+        if (e.target.id != "tableroJuego") {
+            let resultado;
+            let posicion = e.target.getAttribute("data-posicion").split("-");
+            let celda = document.querySelector(`[data-posicion="${posicion[0]}-${posicion[1]}"]`);
+            let fila = parseInt(posicion[0]);
+            let columna = parseInt(posicion[1]);
+            resultado = buscaminas.marcar(fila, columna);
+            resultado == 1 ? celda.innerHTML = "🚩" : resultado == 0 ? celda.innerHTML = "" : null; // Si se ha puesto una bandera o se ha quitado    
+            minasRestantes.innerHTML = buscaminas.banderas;
         }
 
-        
-        minasRestantes.innerHTML = buscaminas.banderas;
     }
 
     function ganarOperder(resultado) {
         if (resultado == 0) {
-            mostrarMinas();
+            mostrarMinas(); // Al haber perdido, se muestran todas las minas
             resultadoHtml.innerHTML = "<h2>Has perdido</h2>";
             tableroJuego.removeEventListener("click", clickTablero);
             tableroJuego.removeEventListener("contextmenu", clickBandera);
+            clearInterval(interval);
         }
         else if (resultado == 1) {
             resultadoHtml.innerHTML = "<h2>Has ganado</h2>";
+            if (localStorage.getItem("tiempoPartida") == null || (localStorage.getItem("tiempoPartida") > tiempo.innerHTML)) {
+                localStorage.setItem("tiempoPartida", tiempo.innerHTML)
+                resultadoHtml.innerHTML += `<h3>Has conseguido el mejor tiempo ${tiempo.innerHTML} segundos</h3>`;
+            }
+            else {
+                resultadoHtml.innerHTML += `<h3>Mejor tiempo: ${localStorage.getItem("tiempoPartida")} segundos.  Tiempo actual: ${tiempo.innerHTML} segundos</h3>`;
+            }
+            clearInterval(interval);
             tableroJuego.removeEventListener("click", clickTablero);
             tableroJuego.removeEventListener("contextmenu", clickBandera);
         }
     }
-
-    
-
-
-
-
-
-
 });
